@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!-- error=null: Spring rellena ${error} con "Too Many Requests" y el layout lo mostraría como alerta -->
+<th:block xmlns:th="http://www.thymeleaf.org" th:with="error=null">
+<html th:replace="~{fragments/layout :: layout(titulo='Acceso bloqueado', contenido=~{::section})}">
+<body>
+    <section class="d-flex flex-column align-items-center justify-content-center text-center" style="min-height:60vh;">
+        <div class="bloqueo-texto">429</div>
+        <h1 class="h4 mt-3">Acceso bloqueado temporalmente</h1>
+        <p class="text-uppercase mt-2" style="color:var(--text-muted); letter-spacing:2px;">
+            <i class="bi bi-shield-lock me-1" style="color:var(--danger)"></i>Demasiadas peticiones desde tu IP
+        </p>
+        <p style="color:var(--text-muted); max-width:32rem;">
+            Hemos detectado actividad sospechosa. Podrás volver a entrar dentro de 5 minutos.
+        </p>
+    </section>
+</body>
+</html>
+</th:block>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(titulo='Listado de coches', contenido=~{::section})}">
+<body>
+    <section>
+        <div class="encabezado-seccion d-flex justify-content-between align-items-end flex-wrap gap-2">
+            <div>
+                <div class="eyebrow">Colección privada</div>
+                <h1 class="h3 mb-0">Garaje de coches</h1>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-tuning" th:text="${totalElementos} + ' vehículos'"></span>
+                <button type="button" class="btn btn-oro btn-sm d-flex align-items-center gap-1"
+                        data-bs-toggle="offcanvas" data-bs-target="#panelFiltros" aria-controls="panelFiltros">
+                    <i class="bi bi-funnel"></i> Filtros
+                    <span th:if="${filtrosActivos > 0}" class="filtros-contador" th:text="${filtrosActivos}"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="panelFiltros" aria-labelledby="panelFiltrosLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="panelFiltrosLabel"><i class="bi bi-funnel me-2"></i>Filtros</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+            </div>
+            <div class="offcanvas-body">
+                <form th:action="@{/coches}" method="get" class="d-flex flex-column gap-3">
+                    <div>
+                        <label for="filtroMarca" class="form-label"><i class="bi bi-tag me-1"></i>Marca</label>
+                        <select id="filtroMarca" name="marca" class="form-select">
+                            <option value="">Todas</option>
+                            <option th:each="m : ${marcasDisponibles}" th:value="${m}" th:text="${m}"
+                                    th:selected="${m == marca}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filtroCombustible" class="form-label"><i class="bi bi-fuel-pump me-1"></i>Combustible</label>
+                        <select id="filtroCombustible" name="combustible" class="form-select">
+                            <option value="">Todos</option>
+                            <option th:each="c : ${combustiblesDisponibles}" th:value="${c}" th:text="${c}"
+                                    th:selected="${c == combustible}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filtroTransmision" class="form-label"><i class="bi bi-gear me-1"></i>Transmisión</label>
+                        <select id="filtroTransmision" name="transmision" class="form-select">
+                            <option value="">Todas</option>
+                            <option th:each="t : ${transmisionesDisponibles}" th:value="${t}" th:text="${t}"
+                                    th:selected="${t == transmision}"></option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-oro flex-fill"><i class="bi bi-funnel me-1"></i>Aplicar</button>
+                        <a th:href="@{/coches}" class="btn btn-ver">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(coches)}" class="estado-vacio">
+            <i class="bi bi-car-front display-4 d-block mb-3" style="color:var(--gold)"></i>
+            No hay coches registrados todavía.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(coches)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" th:each="coche : ${coches}">
+                <div class="coche-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h2 class="marca-modelo" th:text="${coche.marca} + ' ' + ${coche.modelo}"></h2>
+                            <span class="matricula-chip" th:text="${coche.matricula}"></span>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge-tuning" th:text="${coche.combustible}"></span>
+                            <span class="badge-tuning" th:text="${coche.transmision}"></span>
+                        </div>
+
+                        <div class="specs d-flex flex-column gap-1">
+                            <div><i class="bi bi-calendar3"></i> <span th:text="${coche.anio}"></span></div>
+                            <div><i class="bi bi-palette"></i> <span th:text="${coche.color}"></span></div>
+                            <div><i class="bi bi-speedometer2"></i>
+                                <span th:text="${#numbers.formatInteger(coche.kilometraje, 1, 'POINT')} + ' km'"></span>
+                            </div>
+                        </div>
+
+                        <div class="precio" th:text="${#numbers.formatDecimal(coche.precio, 1, 2)} + ' €'"></div>
+
+                        <div class="acciones-card">
+                            <a class="btn btn-ver" th:href="@{/coches/{id}(id=${coche.id})}">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                            <a class="btn btn-editar" th:href="@{/coches/{id}/editar(id=${coche.id})}">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form th:action="@{/coches/{id}/eliminar(id=${coche.id})}" method="post" class="flex-fill"
+                                  onsubmit="return confirm('¿Seguro que quieres eliminar este coche?');">
+                                <button type="submit" class="btn btn-eliminar w-100">
+                                    <i class="bi bi-trash3"></i> Borrar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav th:if="${totalPaginas > 1}" class="d-flex justify-content-center mt-5">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/coches(pagina=${paginaActual - 1}, marca=${marca}, combustible=${combustible}, transmision=${transmision})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                    th:classappend="${i == paginaActual} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/coches(pagina=${i}, marca=${marca}, combustible=${combustible}, transmision=${transmision})}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/coches(pagina=${paginaActual + 1}, marca=${marca}, combustible=${combustible}, transmision=${transmision})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+</body>
+</html>

@@ -1,0 +1,233 @@
+:root {
+    --bg-card: #1b1b20;
+    --gold: #d4af37;
+    --gold-light: #f4e2a1;
+    --neon: #00e5ff;
+    --neon-soft: rgba(0, 229, 255, .35);
+    --text-muted: #9a9aa3;
+    --border: rgba(212, 175, 55, .25);
+    --danger: #ff4d6d;
+}
+
+body {
+    background: radial-gradient(circle at top, #1a1a1f 0%, #0b0b0d 60%) fixed;
+    color: #f5f5f7;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+}
+
+h1, h2, h3, .navbar-brand, .marca-modelo, .precio {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: .5px;
+}
+
+a { text-decoration: none; }
+
+/* Navbar */
+.navbar-lujo {
+    background: linear-gradient(180deg, #0f0f12 0%, #08080a 100%);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 20px rgba(212, 175, 55, .08);
+}
+.navbar-lujo .navbar-brand {
+    color: var(--gold-light) !important;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.btn-oro {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    border: none;
+    color: #14140f;
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-oro:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, .35);
+    color: #14140f;
+}
+
+/* Cabecera de sección */
+.encabezado-seccion { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.75rem; }
+.encabezado-seccion .eyebrow {
+    color: var(--neon); text-transform: uppercase; font-size: .75rem; letter-spacing: 2px; font-weight: 600;
+}
+
+/* Alertas tema oscuro */
+.alert-lujo-success { background: rgba(212, 175, 55, .08); border: 1px solid var(--gold); color: var(--gold-light); }
+.alert-lujo-danger { background: rgba(255, 77, 109, .08); border: 1px solid var(--danger); color: #ff8fa3; }
+
+/* Tarjeta de coche */
+.coche-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    height: 100%;
+}
+.coche-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--neon));
+}
+.coche-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--neon-soft);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .5), 0 0 20px rgba(0, 229, 255, .08);
+}
+.coche-card .card-body { padding: 1.35rem; display: flex; flex-direction: column; gap: .9rem; }
+.coche-card .marca-modelo { font-size: 1.05rem; color: #fff; margin: 0; }
+.matricula-chip {
+    display: inline-block;
+    background: #000;
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: .72rem;
+    padding: .15rem .55rem;
+    letter-spacing: 1px;
+}
+.coche-card .precio { color: var(--gold-light); font-size: 1.3rem; font-weight: 700; }
+.coche-card .specs { color: var(--text-muted); font-size: .85rem; }
+.coche-card .specs i { color: var(--neon); width: 1.1rem; }
+
+.badge-tuning {
+    background: rgba(0, 229, 255, .1);
+    border: 1px solid var(--neon-soft);
+    color: var(--neon);
+    font-weight: 500;
+    border-radius: 20px;
+    padding: .3rem .7rem;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.acciones-card { display: flex; gap: .4rem; margin-top: auto; }
+.btn-ver, .btn-editar, .btn-eliminar {
+    flex: 1; border-radius: 8px; font-size: .8rem; padding: .4rem .5rem;
+}
+.btn-ver { border: 1px solid var(--text-muted); color: var(--text-muted); }
+.btn-ver:hover { border-color: var(--neon); color: var(--neon); background: transparent; }
+.btn-editar { border: 1px solid var(--gold); color: var(--gold-light); }
+.btn-editar:hover { background: var(--gold); color: #14140f; }
+.btn-eliminar { border: 1px solid var(--danger); color: var(--danger); background: transparent; }
+.btn-eliminar:hover { background: var(--danger); color: #14140f; }
+
+/* Formulario */
+.panel-formulario {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .4);
+}
+.form-label { color: var(--gold-light); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+.form-control {
+    background: #0e0e11; border: 1px solid rgba(255, 255, 255, .08); color: #f5f5f7;
+}
+.form-control:focus {
+    background: #0e0e11; border-color: var(--neon); color: #f5f5f7;
+    box-shadow: 0 0 0 .2rem rgba(0, 229, 255, .15);
+}
+.form-control::placeholder { color: #55555c; }
+
+.form-select {
+    background: #0e0e11; border: 1px solid rgba(255, 255, 255, .08); color: #f5f5f7;
+}
+.form-select:focus {
+    background: #0e0e11; border-color: var(--neon); color: #f5f5f7;
+    box-shadow: 0 0 0 .2rem rgba(0, 229, 255, .15);
+}
+.form-select option { background: #0e0e11; color: #f5f5f7; }
+
+/* Boton y contador de filtros */
+.filtros-contador {
+    background: #14140f;
+    color: var(--gold-light);
+    border-radius: 50%;
+    font-size: .7rem;
+    font-weight: 700;
+    width: 1.3rem;
+    height: 1.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Panel de filtros (offcanvas) */
+.offcanvas {
+    background: var(--bg-card);
+    color: #f5f5f7;
+    border-left: 1px solid var(--border);
+}
+.offcanvas-header { border-bottom: 1px solid var(--border); }
+.offcanvas .btn-close { filter: invert(1) grayscale(1); }
+.offcanvas-backdrop.show { opacity: .7; }
+
+/* Paginacion */
+.pagination .page-link {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+.pagination .page-link:hover { color: var(--neon); background: var(--bg-card); }
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-color: var(--gold);
+    color: #14140f;
+}
+.pagination .page-item.disabled .page-link { color: #55555c; background: var(--bg-card); }
+
+/* Ficha de detalle */
+.ficha-coche { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.ficha-coche .cabecera {
+    background: linear-gradient(135deg, #17171b, #0b0b0d);
+    padding: 2rem; border-bottom: 1px solid var(--border);
+}
+.stat-tile { background: #0e0e11; border: 1px solid rgba(255, 255, 255, .06); border-radius: 10px; padding: .9rem 1rem; height: 100%; }
+.stat-tile .label { color: var(--text-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .6px; }
+.stat-tile .value { color: #fff; font-weight: 600; font-size: 1.05rem; }
+
+.estado-vacio { border: 1px dashed var(--border); border-radius: 16px; padding: 3rem; text-align: center; color: var(--text-muted); }
+
+/* Ping */
+.pong-texto {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(4rem, 16vw, 11rem);
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 45%, var(--neon) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 60px rgba(0, 229, 255, .25);
+    animation: pong-pulso 2.4s ease-in-out infinite;
+}
+@keyframes pong-pulso {
+    0%, 100% { filter: drop-shadow(0 0 15px rgba(212, 175, 55, .35)); }
+    50% { filter: drop-shadow(0 0 35px rgba(0, 229, 255, .45)); }
+}
+
+/* Página de bloqueo (error 429) */
+.bloqueo-texto {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(4rem, 16vw, 11rem);
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, var(--danger) 0%, #ff8fa3 45%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: bloqueo-pulso 2.4s ease-in-out infinite;
+}
+@keyframes bloqueo-pulso {
+    0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 77, 109, .35)); }
+    50% { filter: drop-shadow(0 0 35px rgba(255, 77, 109, .6)); }
+}

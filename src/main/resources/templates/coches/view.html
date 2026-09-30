@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(titulo='Detalle del coche', contenido=~{::section})}">
+<body>
+    <section>
+        <div class="ficha-coche">
+            <div class="cabecera d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <div class="eyebrow mb-1">Ficha del vehículo</div>
+                    <h1 class="h3 mb-1" th:text="${coche.marca} + ' ' + ${coche.modelo}"></h1>
+                    <span class="matricula-chip" th:text="${coche.matricula}"></span>
+                </div>
+                <div class="precio" th:text="${#numbers.formatDecimal(coche.precio, 1, 2)} + ' €'"></div>
+            </div>
+
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="label"><i class="bi bi-calendar3"></i> Año</div>
+                            <div class="value" th:text="${coche.anio}"></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="label"><i class="bi bi-palette"></i> Color</div>
+                            <div class="value" th:text="${coche.color}"></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="label"><i class="bi bi-speedometer2"></i> Kilometraje</div>
+                            <div class="value" th:text="${#numbers.formatInteger(coche.kilometraje, 1, 'POINT')} + ' km'"></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="label"><i class="bi bi-fuel-pump"></i> Combustible</div>
+                            <div class="value" th:text="${coche.combustible}"></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="label"><i class="bi bi-gear"></i> Transmisión</div>
+                            <div class="value" th:text="${coche.transmision}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a class="btn btn-oro" th:href="@{/coches/{id}/editar(id=${coche.id})}">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                    <a class="btn btn-ver" th:href="@{/coches}">
+                        <i class="bi bi-arrow-left me-1"></i>Volver al listado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
