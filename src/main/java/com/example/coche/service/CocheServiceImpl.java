@@ -8,11 +8,7 @@ import com.example.coche.repository.LogTransaccionDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -25,18 +21,12 @@ public class CocheServiceImpl implements CocheService {
     private static final String RESULTADO_OK = "OK";
     private static final String RESULTADO_ERROR = "ERROR";
 
-    // Copia del log en formato JSON (se crea en la carpeta del proyecto, igual que ips.txt)
-    private static final Path ARCHIVO_LOG_JSON = Path.of("log_transacciones.json");
-
     private final CocheRepository cocheRepository;
     private final LogTransaccionDAO logTransaccionDAO;
-    private final ObjectMapper objectMapper;
 
-    public CocheServiceImpl(CocheRepository cocheRepository, LogTransaccionDAO logTransaccionDAO,
-                            ObjectMapper objectMapper) {
+    public CocheServiceImpl(CocheRepository cocheRepository, LogTransaccionDAO logTransaccionDAO) {
         this.cocheRepository = cocheRepository;
         this.logTransaccionDAO = logTransaccionDAO;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -117,21 +107,8 @@ public class CocheServiceImpl implements CocheService {
                         : new RuntimeException("Error al confirmar la operación " + accion, e);
             } finally {
                 restaurarAutocommit(conexion);
-                actualizarArchivoJson();
+                logTransaccionDAO.actualizarArchivoJson();
             }
-        }
-    }
-
-    // El archivo se regenera entero a partir de la tabla cuando la transacción ya ha terminado:
-    // así nunca contiene un cambio que el rollback haya deshecho
-    private void actualizarArchivoJson() {
-        try {
-            String json = objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(logTransaccionDAO.listarTodos());
-            Files.writeString(ARCHIVO_LOG_JSON, json);
-        } catch (IOException | RuntimeException e) {
-            // Si falla la escritura, lo avisamos, pero la operación sobre el coche ya está resuelta
-            log.error("No se pudo actualizar {}", ARCHIVO_LOG_JSON, e);
         }
     }
 

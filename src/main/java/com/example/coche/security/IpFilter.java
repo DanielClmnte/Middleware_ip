@@ -1,5 +1,6 @@
 package com.example.coche.security;
 
+import com.example.coche.repository.LogTransaccionDAO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,12 @@ public class IpFilter extends OncePerRequestFilter {
     // IP -> momento (en nanosegundos) en que termina su bloqueo
     private final Map<String, Long> bloqueadas = new ConcurrentHashMap<>();
 
+    private final LogTransaccionDAO logTransaccionDAO;
+
+    public IpFilter(LogTransaccionDAO logTransaccionDAO) {
+        this.logTransaccionDAO = logTransaccionDAO;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws ServletException, IOException {
@@ -64,7 +71,12 @@ public class IpFilter extends OncePerRequestFilter {
                 return;               // NO llamamos a chain.doFilter -> la petición muere aquí
             }
 
-            bloqueadas.remove(ip);    // ya pasaron los 5 minutos: se le perdona
+            // ya pasaron los 5 minutos: se le perdona.
+            // remove(ip, finBloqueo) solo devuelve true a UNA petición aunque lleguen varias a la vez,
+            // así el desbloqueo se apunta una sola vez en el log
+            if (bloqueadas.remove(ip, finBloqueo)) {
+                registrarEnLog(ip, "DESBLOQUEO", "Bloqueo de 5 minutos cumplido", "OK");
+            }
         }
 
         // 2. Contar peticiones en el último segundo (ventana deslizante)
@@ -82,12 +94,25 @@ public class IpFilter extends OncePerRequestFilter {
                 tiempos.clear();
                 log.warn("IP {} BLOQUEADA: más de {} peticiones en 1 segundo", ip, MAX_PETICIONES);
                 guardarEnArchivo(ip, "*** BLOQUEADA 5 min por exceso de peticiones ***");
+                registrarEnLog(ip, "BLOQUEO",
+                        "Más de " + MAX_PETICIONES + " peticiones en 1 segundo: bloqueada 5 minutos", "429");
                 res.sendError(429);
                 return;
             }
         }
 
         chain.doFilter(req, res);
+    }
+
+    // Apunta el evento en la tabla log_transaccion (y en su copia JSON), junto a los cambios de coches
+    private void registrarEnLog(String ip, String accion, String detalle, String resultado) {
+        try {
+            logTransaccionDAO.registrar(ip, accion, null, detalle, resultado);
+            logTransaccionDAO.actualizarArchivoJson();
+        } catch (RuntimeException e) {
+            // Si la base de datos falla, lo avisamos, pero el filtro sigue protegiendo la web
+            log.error("No se pudo registrar {} de la IP {} en log_transaccion", accion, ip, e);
+        }
     }
 
     // synchronized: si llegan dos peticiones a la vez, escriben de una en una
