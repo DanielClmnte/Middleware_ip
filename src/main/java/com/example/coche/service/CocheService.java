@@ -18,9 +18,9 @@ public interface CocheService {
 
     Coche findById(Long id);
 
-    Coche save(Coche coche);
+    Coche save(Coche coche, String ip);
 
-    void update(Long id, Coche coche);
+    void update(Long id, Coche coche, String ip);
 
-    void deleteById(Long id);
+    void deleteById(Long id, String ip);
 }

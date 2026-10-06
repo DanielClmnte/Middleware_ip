@@ -4,6 +4,7 @@ import com.example.coche.exception.CocheNoEncontradoException;
 import com.example.coche.model.Coche;
 import com.example.coche.service.CocheService;
 import com.example.coche.service.ResultadoPagina;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -76,11 +77,12 @@ public class CocheController {
     @PostMapping
     public String crear(@Valid @ModelAttribute("coche") Coche coche,
                          BindingResult resultado,
-                         RedirectAttributes redirectAttributes) {
+                         RedirectAttributes redirectAttributes,
+                         HttpServletRequest request) {
         if (resultado.hasErrors()) {
             return "coches/form";
         }
-        cocheService.save(coche);
+        cocheService.save(coche, request.getRemoteAddr());
         redirectAttributes.addFlashAttribute("mensaje", "Coche creado correctamente");
         return "redirect:/coches";
     }
@@ -95,18 +97,20 @@ public class CocheController {
     public String actualizar(@PathVariable Long id,
                               @Valid @ModelAttribute("coche") Coche coche,
                               BindingResult resultado,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes,
+                              HttpServletRequest request) {
         if (resultado.hasErrors()) {
             return "coches/form";
         }
-        cocheService.update(id, coche);
+        cocheService.update(id, coche, request.getRemoteAddr());
         redirectAttributes.addFlashAttribute("mensaje", "Coche actualizado correctamente");
         return "redirect:/coches";
     }
 
     @PostMapping("/{id}/eliminar")
-    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        cocheService.deleteById(id);
+    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes,
+                           HttpServletRequest request) {
+        cocheService.deleteById(id, request.getRemoteAddr());
         redirectAttributes.addFlashAttribute("mensaje", "Coche eliminado correctamente");
         return "redirect:/coches";
     }

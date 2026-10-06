@@ -1,6 +1,7 @@
 package com.example.coche.service;
 
 import com.example.coche.exception.CocheNoEncontradoException;
+import com.example.coche.log.RegistroTransacciones;
 import com.example.coche.model.Coche;
 import com.example.coche.repository.CocheRepository;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,11 @@ import java.util.List;
 public class CocheServiceImpl implements CocheService {
 
     private final CocheRepository cocheRepository;
+    private final RegistroTransacciones registro;
 
-    public CocheServiceImpl(CocheRepository cocheRepository) {
+    public CocheServiceImpl(CocheRepository cocheRepository, RegistroTransacciones registro) {
         this.cocheRepository = cocheRepository;
+        this.registro = registro;
     }
 
     @Override
@@ -53,20 +56,41 @@ public class CocheServiceImpl implements CocheService {
     }
 
     @Override
-    public Coche save(Coche coche) {
-        return cocheRepository.save(coche);
+    public Coche save(Coche coche, String ip) {
+        try {
+            Coche guardado = cocheRepository.save(coche);
+            registro.registrar(ip, "CREAR", guardado.getId(),
+                    coche.getMarca() + " " + coche.getModelo(), "OK");
+            return guardado;
+        } catch (RuntimeException e) {
+            registro.registrar(ip, "CREAR", null, e.getMessage(), "ERROR");
+            throw e;
+        }
     }
 
     @Override
-    public void update(Long id, Coche coche) {
-        findById(id);
+    public void update(Long id, Coche coche, String ip) {
         coche.setId(id);
-        cocheRepository.update(coche);
+        try {
+            findById(id);                       // si no existe, lanza CocheNoEncontradoException
+            cocheRepository.update(coche);
+            registro.registrar(ip, "EDITAR", id,
+                    coche.getMarca() + " " + coche.getModelo(), "OK");
+        } catch (RuntimeException e) {
+            registro.registrar(ip, "EDITAR", id, e.getMessage(), "ERROR");
+            throw e;
+        }
     }
 
     @Override
-    public void deleteById(Long id) {
-        findById(id);
-        cocheRepository.deleteById(id);
+    public void deleteById(Long id, String ip) {
+        try {
+            findById(id);                       // si no existe, lanza CocheNoEncontradoException
+            cocheRepository.deleteById(id);
+            registro.registrar(ip, "ELIMINAR", id, "coche id " + id, "OK");
+        } catch (RuntimeException e) {
+            registro.registrar(ip, "ELIMINAR", id, e.getMessage(), "ERROR");
+            throw e;
+        }
     }
 }
