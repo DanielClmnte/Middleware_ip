@@ -2,6 +2,7 @@ package com.example.coche.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import com.example.coche.log.RegistroTransacciones;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -38,6 +39,14 @@ public class IpFilter extends OncePerRequestFilter {
     private final Map<String, Deque<Long>> historial = new ConcurrentHashMap<>();
     // IP -> momento (en nanosegundos) en que termina su bloqueo
     private final Map<String, Long> bloqueadas = new ConcurrentHashMap<>();
+
+    // Historial de transacciones (el mismo transacciones.json que usan los coches):
+    // aqui lo usamos para apuntar tambien los bloqueos de IP.
+    private final RegistroTransacciones registro;
+
+    public IpFilter(RegistroTransacciones registro) {
+        this.registro = registro;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
@@ -82,6 +91,9 @@ public class IpFilter extends OncePerRequestFilter {
                 tiempos.clear();
                 log.warn("IP {} BLOQUEADA: más de {} peticiones en 1 segundo", ip, MAX_PETICIONES);
                 guardarEnArchivo(ip, "*** BLOQUEADA 5 min por exceso de peticiones ***");
+                // Tambien lo apuntamos en el historial de transacciones (transacciones.json)
+                registro.registrar(ip, "BLOQUEO", null,
+                        "mas de " + MAX_PETICIONES + " peticiones en 1 segundo", "BLOQUEADA");
                 res.sendError(429);
                 return;
             }
