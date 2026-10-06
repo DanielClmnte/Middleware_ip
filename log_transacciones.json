@@ -1,0 +1,97 @@
+[ {
+  "id" : 12,
+  "fecha" : "2026-10-06 18:29:16",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "ELIMINAR",
+  "cocheId" : 14,
+  "detalle" : "Prueba Json (TEST888J)",
+  "resultado" : "OK"
+}, {
+  "id" : 11,
+  "fecha" : "2026-10-06 18:29:15",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "CREAR",
+  "cocheId" : 14,
+  "detalle" : "Prueba Json (TEST888J)",
+  "resultado" : "OK"
+}, {
+  "id" : 10,
+  "fecha" : "2026-10-06 17:33:19",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 2,
+  "detalle" : "Duplicate entry '1234ABC' for key 'matricula'",
+  "resultado" : "ERROR"
+}, {
+  "id" : 9,
+  "fecha" : "2026-10-06 17:31:54",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 1,
+  "detalle" : "Toyota Corolla 10 (1234ABC)",
+  "resultado" : "OK"
+}, {
+  "id" : 8,
+  "fecha" : "2026-10-06 17:30:49",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 1,
+  "detalle" : "Toyota Corolla 10 ()",
+  "resultado" : "OK"
+}, {
+  "id" : 7,
+  "fecha" : "2026-10-06 17:30:39",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 1,
+  "detalle" : " Corolla 10 (1234ABC)",
+  "resultado" : "OK"
+}, {
+  "id" : 6,
+  "fecha" : "2026-10-06 17:30:11",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 1,
+  "detalle" : "Toyota Corolla 10 (1234ABC)",
+  "resultado" : "OK"
+}, {
+  "id" : 5,
+  "fecha" : "2026-10-06 17:23:56",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "CREAR",
+  "cocheId" : null,
+  "detalle" : "Duplicate entry '1234ABC' for key 'matricula'",
+  "resultado" : "ERROR"
+}, {
+  "id" : 4,
+  "fecha" : "2026-10-06 17:23:29",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "ELIMINAR",
+  "cocheId" : 11,
+  "detalle" : "Prueba Log (TEST999Z)",
+  "resultado" : "OK"
+}, {
+  "id" : 3,
+  "fecha" : "2026-10-06 17:23:16",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "CREAR",
+  "cocheId" : null,
+  "detalle" : "Error al guardar el coche",
+  "resultado" : "ERROR"
+}, {
+  "id" : 2,
+  "fecha" : "2026-10-06 17:23:16",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "EDITAR",
+  "cocheId" : 11,
+  "detalle" : "Prueba Log (TEST999Z)",
+  "resultado" : "OK"
+}, {
+  "id" : 1,
+  "fecha" : "2026-10-06 17:23:16",
+  "ip" : "0:0:0:0:0:0:0:1",
+  "accion" : "CREAR",
+  "cocheId" : 11,
+  "detalle" : "Prueba Log (TEST999Z)",
+  "resultado" : "OK"
+} ]
