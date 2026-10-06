@@ -18,9 +18,11 @@ public interface CocheService {
 
     Coche findById(Long id);
 
-    Coche save(Coche coche);
+    // Las tres operaciones de escritura reciben la IP del cliente para apuntarla en log_transaccion
 
-    void update(Long id, Coche coche);
+    Coche save(Coche coche, String ip);
 
-    void deleteById(Long id);
+    void update(Long id, Coche coche, String ip);
+
+    void deleteById(Long id, String ip);
 }

@@ -1,14 +1,18 @@
 package com.example.coche.conexion;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class ConexionBD {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/coche_db?useSSL=false&serverTimezone=UTC";
-    private static final String USUARIO = "root";
-    private static final String PASSWORD = "root";
+    // La URL, el usuario y la contraseña se leen de application.properties (claves db.*)
+    private static final String ARCHIVO_CONFIGURACION = "/application.properties";
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 
     private static ConexionBD instancia;
@@ -17,10 +21,25 @@ public class ConexionBD {
 
     private ConexionBD() {
         try {
+            Properties configuracion = cargarConfiguracion();
             Class.forName(DRIVER);
-            conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
+            conexion = DriverManager.getConnection(
+                    configuracion.getProperty("db.url"),
+                    configuracion.getProperty("db.usuario"),
+                    configuracion.getProperty("db.password", ""));
+        } catch (ClassNotFoundException | SQLException | IOException e) {
             throw new RuntimeException("Error al conectar con la base de datos", e);
+        }
+    }
+
+    private static Properties cargarConfiguracion() throws IOException {
+        try (InputStream entrada = ConexionBD.class.getResourceAsStream(ARCHIVO_CONFIGURACION)) {
+            if (entrada == null) {
+                throw new IOException("No se encuentra " + ARCHIVO_CONFIGURACION);
+            }
+            Properties configuracion = new Properties();
+            configuracion.load(new InputStreamReader(entrada, StandardCharsets.UTF_8));
+            return configuracion;
         }
     }
 
