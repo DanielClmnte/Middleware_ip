@@ -52,7 +52,7 @@ public class IpFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String ip = req.getRemoteAddr();
+        String ip = obtenerIp(req);
         String metodo = req.getMethod();
         String ruta = req.getRequestURI();
         long ahora = System.nanoTime();
@@ -100,6 +100,24 @@ public class IpFilter extends OncePerRequestFilter {
         }
 
         chain.doFilter(req, res);
+    }
+
+    /**
+     * Devuelve la IP del cliente. Si viene la cabecera X-Forwarded-For (la que ponen
+     * los proxys/balanceadores con la IP real), usa la primera IP de esa cabecera;
+     * si no, usa la IP de la conexion (getRemoteAddr).
+     *
+     * OJO (importante para la memoria): confiar en X-Forwarded-For solo es seguro si la
+     * cabecera la pone TU proxy. Un cliente puede falsificarla para fingir muchas IPs
+     * distintas (justo lo que hace nuestro bot de pruebas). En produccion solo deberia
+     * leerse esta cabecera cuando viene de un proxy de confianza.
+     */
+    private String obtenerIp(HttpServletRequest req) {
+        String xff = req.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            return xff.split(",")[0].trim();   // la primera IP de la lista es la del cliente original
+        }
+        return req.getRemoteAddr();
     }
 
     // synchronized: si llegan dos peticiones a la vez, escriben de una en una
