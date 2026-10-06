@@ -123,7 +123,6 @@ replay_pid*
 target/
 # Registro de IPs (se genera en cada ejecucion)
 ips.txt
-transacciones.json
 # Copia de seguridad local del filtro
 backup/
 # macOS

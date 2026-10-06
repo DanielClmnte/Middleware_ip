@@ -1,0 +1,29 @@
+[ {
+  "fecha" : "2026-10-06 17:26:37",
+  "ip" : "127.0.0.1",
+  "accion" : "CREAR",
+  "cocheId" : 18,
+  "detalle" : "Mazda MX-5",
+  "resultado" : "OK"
+}, {
+  "fecha" : "2026-10-06 17:26:38",
+  "ip" : "127.0.0.1",
+  "accion" : "EDITAR",
+  "cocheId" : 18,
+  "detalle" : "Mazda MX-5 Roadster",
+  "resultado" : "OK"
+}, {
+  "fecha" : "2026-10-06 17:26:38",
+  "ip" : "127.0.0.1",
+  "accion" : "ELIMINAR",
+  "cocheId" : 18,
+  "detalle" : "coche id 18",
+  "resultado" : "OK"
+}, {
+  "fecha" : "2026-10-06 17:26:38",
+  "ip" : "127.0.0.1",
+  "accion" : "EDITAR",
+  "cocheId" : 999999,
+  "detalle" : "No existe ningún coche con id 999999",
+  "resultado" : "ERROR"
+} ]
