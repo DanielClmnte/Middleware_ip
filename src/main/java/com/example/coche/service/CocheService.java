@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface CocheService {
 
-    List<Coche> findAll();
-
     ResultadoPagina<Coche> buscar(String marca, String combustible, String transmision, int pagina, int tamanioPagina);
 
     List<String> listarMarcasDisponibles();

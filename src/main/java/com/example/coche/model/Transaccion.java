@@ -1,4 +1,4 @@
-package com.example.coche.log;
+package com.example.coche.model;
 
 /**
  * Un movimiento de la web para el historial transacciones.json.

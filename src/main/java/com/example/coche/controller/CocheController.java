@@ -1,14 +1,13 @@
 package com.example.coche.controller;
 
 import com.example.coche.exception.CocheNoEncontradoException;
+import com.example.coche.exception.DatosInvalidosException;
 import com.example.coche.model.Coche;
 import com.example.coche.service.CocheService;
 import com.example.coche.service.ResultadoPagina;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -40,10 +39,10 @@ public class CocheController {
         ResultadoPagina<Coche> resultado =
                 cocheService.buscar(marca, combustible, transmision, pagina, COCHES_POR_PAGINA);
 
-        model.addAttribute("coches", resultado.getContenido());
-        model.addAttribute("paginaActual", resultado.getPaginaActual());
-        model.addAttribute("totalPaginas", resultado.getTotalPaginas());
-        model.addAttribute("totalElementos", resultado.getTotalElementos());
+        model.addAttribute("coches", resultado.contenido());
+        model.addAttribute("paginaActual", resultado.paginaActual());
+        model.addAttribute("totalPaginas", resultado.totalPaginas());
+        model.addAttribute("totalElementos", resultado.totalElementos());
         model.addAttribute("marca", marca);
         model.addAttribute("combustible", combustible);
         model.addAttribute("transmision", transmision);
@@ -75,14 +74,15 @@ public class CocheController {
     }
 
     @PostMapping
-    public String crear(@Valid @ModelAttribute("coche") Coche coche,
-                         BindingResult resultado,
+    public String crear(@ModelAttribute("coche") Coche coche, Model model,
                          RedirectAttributes redirectAttributes,
                          HttpServletRequest request) {
-        if (resultado.hasErrors()) {
+        try {
+            cocheService.save(coche, request.getRemoteAddr());
+        } catch (DatosInvalidosException e) {
+            model.addAttribute("error", e.getMessage());   // volvemos al formulario con lo que escribio el usuario
             return "coches/form";
         }
-        cocheService.save(coche, request.getRemoteAddr());
         redirectAttributes.addFlashAttribute("mensaje", "Coche creado correctamente");
         return "redirect:/coches";
     }
@@ -95,14 +95,15 @@ public class CocheController {
 
     @PostMapping("/{id}")
     public String actualizar(@PathVariable Long id,
-                              @Valid @ModelAttribute("coche") Coche coche,
-                              BindingResult resultado,
+                              @ModelAttribute("coche") Coche coche, Model model,
                               RedirectAttributes redirectAttributes,
                               HttpServletRequest request) {
-        if (resultado.hasErrors()) {
+        try {
+            cocheService.update(id, coche, request.getRemoteAddr());
+        } catch (DatosInvalidosException e) {
+            model.addAttribute("error", e.getMessage());
             return "coches/form";
         }
-        cocheService.update(id, coche, request.getRemoteAddr());
         redirectAttributes.addFlashAttribute("mensaje", "Coche actualizado correctamente");
         return "redirect:/coches";
     }
