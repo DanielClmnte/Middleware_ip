@@ -1,6 +1,6 @@
 package com.example.coche.security;
 
-import com.example.coche.service.RegistroTransacciones;
+import com.example.coche.service.RegistroHistorial;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,9 +43,9 @@ public class IpFilter extends OncePerRequestFilter {
     // IP -> momento (en milisegundos) en que termina su bloqueo
     private final Map<String, Long> bloqueadas = new ConcurrentHashMap<>();
 
-    private final RegistroTransacciones registro;
+    private final RegistroHistorial registro;
 
-    public IpFilter(RegistroTransacciones registro) {
+    public IpFilter(RegistroHistorial registro) {
         this.registro = registro;
     }
 

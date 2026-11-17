@@ -15,9 +15,9 @@ public class CocheServiceImpl implements CocheService {
     private static final BigDecimal PRECIO_MAXIMO = new BigDecimal("99999999.99");   // lo que cabe en DECIMAL(10,2)
 
     private final CocheRepository cocheRepository;
-    private final RegistroTransacciones registro;
+    private final RegistroHistorial registro;
 
-    public CocheServiceImpl(CocheRepository cocheRepository, RegistroTransacciones registro) {
+    public CocheServiceImpl(CocheRepository cocheRepository, RegistroHistorial registro) {
         this.cocheRepository = cocheRepository;
         this.registro = registro;
     }

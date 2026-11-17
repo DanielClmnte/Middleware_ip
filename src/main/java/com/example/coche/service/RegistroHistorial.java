@@ -1,6 +1,6 @@
 package com.example.coche.service;
 
-import com.example.coche.model.Transaccion;
+import com.example.coche.model.Movimiento;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
@@ -18,14 +18,14 @@ import java.util.List;
 
 /**
  * Historial de movimientos de la web: guarda cada operacion (crear, editar, eliminar)
- * en el archivo transacciones.json como un array de objetos JSON.
+ * en el archivo historial.json como un array de objetos JSON.
  */
 @Component
-public class RegistroTransacciones {
+public class RegistroHistorial {
 
-    private static final Logger log = LoggerFactory.getLogger(RegistroTransacciones.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistroHistorial.class);
 
-    private static final Path ARCHIVO = Path.of("transacciones.json");
+    private static final Path ARCHIVO = Path.of("historial.json");
     private static final DateTimeFormatter FORMATO_FECHA =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -36,10 +36,10 @@ public class RegistroTransacciones {
     // synchronized: si dos operaciones ocurren a la vez, no se pisan al leer/escribir el archivo.
     public synchronized void registrar(String ip, String accion, Long cocheId,
                                        String detalle, String resultado) {
-        Transaccion nueva = new Transaccion(
+        Movimiento nueva = new Movimiento(
                 LocalDateTime.now().format(FORMATO_FECHA), ip, accion, cocheId, detalle, resultado);
         try {
-            List<Transaccion> historial = leerHistorial();  // lo que ya habia
+            List<Movimiento> historial = leerHistorial();  // lo que ya habia
             historial.add(nueva);                            // añado el movimiento nuevo
             mapper.writeValue(ARCHIVO.toFile(), historial);  // reescribo el array completo
         } catch (IOException e) {
@@ -49,11 +49,11 @@ public class RegistroTransacciones {
     }
 
     // Lee el array actual del JSON; si el archivo no existe o esta vacio, devuelve una lista vacia.
-    private List<Transaccion> leerHistorial() throws IOException {
+    private List<Movimiento> leerHistorial() throws IOException {
         if (!Files.exists(ARCHIVO) || Files.size(ARCHIVO) == 0) {
             return new ArrayList<>();
         }
-        Transaccion[] existentes = mapper.readValue(ARCHIVO.toFile(), Transaccion[].class);
+        Movimiento[] existentes = mapper.readValue(ARCHIVO.toFile(), Movimiento[].class);
         return new ArrayList<>(Arrays.asList(existentes));
     }
 }

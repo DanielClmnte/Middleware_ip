@@ -29,6 +29,6 @@ java bot/BotPruebaBloqueo.java /coches      # ataca /coches
 
 Por cada dirección: unas 20 peticiones aceptadas (200) y 10 bloqueadas (429). Después abre
 `http://localhost:8081` en el navegador: saldrá la página de bloqueo durante 5 minutos. Los bloqueos
-quedan anotados en `ips.txt` y en `transacciones.json`.
+quedan anotados en `ips.txt` y en `historial.json`.
 
 Para desbloquearte antes de tiempo, reinicia la web.

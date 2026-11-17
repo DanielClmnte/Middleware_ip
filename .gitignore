@@ -22,7 +22,7 @@ target/
 # Errores de la JVM
 hs_err_pid*
 
-# OJO: ips.txt y transacciones.json NO se ignoran. Se suben con datos de ejemplo
+# OJO: ips.txt y historial.json NO se ignoran. Se suben con datos de ejemplo
 # (IP 192.0.2.10) para que se vea que existen; la app los va rellenando al ejecutarse.
 
 # Copias de seguridad y archivos sobrantes

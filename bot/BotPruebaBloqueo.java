@@ -66,7 +66,7 @@ public class BotPruebaBloqueo {
         if (algunBloqueo) {
             System.out.println("El middleware bloqueó la IP: el filtro funciona.");
             System.out.println("Queda bloqueada 5 minutos. Abre http://localhost:8081 en el navegador para verlo.");
-            System.out.println("Los bloqueos quedan registrados en ips.txt y transacciones.json.");
+            System.out.println("Los bloqueos quedan registrados en ips.txt y historial.json.");
         } else if (!algunaRespuesta) {
             System.out.println("No hubo respuesta. Arranca Middleware_ip antes de ejecutar el bot.");
         } else {
