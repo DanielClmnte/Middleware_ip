@@ -1,1 +1,22 @@
-[]
+[ {
+  "fecha" : "2026-01-01 10:00:03",
+  "ip" : "192.0.2.10",
+  "accion" : "CREAR",
+  "cocheId" : 1,
+  "detalle" : "Toyota Corolla",
+  "resultado" : "OK"
+}, {
+  "fecha" : "2026-01-01 10:02:15",
+  "ip" : "192.0.2.10",
+  "accion" : "BLOQUEO",
+  "cocheId" : null,
+  "detalle" : "mas de 20 peticiones en 1 segundo",
+  "resultado" : "BLOQUEADA"
+}, {
+  "fecha" : "2026-01-01 10:07:20",
+  "ip" : "192.0.2.10",
+  "accion" : "DESBLOQUEO",
+  "cocheId" : null,
+  "detalle" : "bloqueo de 5 minutos cumplido",
+  "resultado" : "OK"
+} ]
