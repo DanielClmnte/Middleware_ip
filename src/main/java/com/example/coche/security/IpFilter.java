@@ -78,7 +78,11 @@ public class IpFilter extends OncePerRequestFilter {
             res.sendError(429);   // 429 = Too Many Requests
             return;               // NO llamamos a chain.doFilter -> la peticion muere aqui
         }
-        bloqueadas.remove(ip);    // si ya pasaron los 5 minutos, se le perdona
+        if (bloqueadas.remove(ip) != null) {    // si tenia un bloqueo que ya caduco, se le perdona...
+            log.info("IP {} DESBLOQUEADA: ya pasaron los 5 minutos", ip);
+            guardarEnArchivo(ip, "*** DESBLOQUEADA ***");
+            registro.registrar(ip, "DESBLOQUEO", null, "bloqueo de 5 minutos cumplido", "OK");   // ...y se apunta
+        }
 
         // 2. Contamos las peticiones del ultimo segundo
         Deque<Long> tiempos = historial.computeIfAbsent(ip, k -> new ArrayDeque<>());
@@ -102,7 +106,7 @@ public class IpFilter extends OncePerRequestFilter {
             }
         }
 
-        chain.doFilter(req, res);   // todo bien: la peticion sigue hacia el controller
+        chain.doFilter(req, res);
     }
 
     // synchronized: si llegan dos peticiones a la vez, escriben de una en una
