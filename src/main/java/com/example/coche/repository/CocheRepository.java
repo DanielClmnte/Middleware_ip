@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public interface CocheRepository {
 
-    List<Coche> findAll();
-
     List<Coche> buscar(String marca, String combustible, String transmision, int pagina, int tamanioPagina);
 
     long contar(String marca, String combustible, String transmision);
+
+    boolean existeMatricula(String matricula, long idExcluido);
 
     List<String> findDistinctMarcas();
 

@@ -1,57 +1,35 @@
 package com.example.coche.service;
 
-import com.example.coche.conexion.ConexionBD;
 import com.example.coche.exception.CocheNoEncontradoException;
+import com.example.coche.exception.DatosInvalidosException;
 import com.example.coche.model.Coche;
 import com.example.coche.repository.CocheRepository;
-import com.example.coche.repository.LogTransaccionDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class CocheServiceImpl implements CocheService {
 
-    private static final Logger log = LoggerFactory.getLogger(CocheServiceImpl.class);
-
-    private static final String RESULTADO_OK = "OK";
-    private static final String RESULTADO_ERROR = "ERROR";
-
-    // Copia del log en formato JSON (se crea en la carpeta del proyecto, igual que ips.txt)
-    private static final Path ARCHIVO_LOG_JSON = Path.of("log_transacciones.json");
+    private static final BigDecimal PRECIO_MAXIMO = new BigDecimal("99999999.99");   // lo que cabe en DECIMAL(10,2)
 
     private final CocheRepository cocheRepository;
-    private final LogTransaccionDAO logTransaccionDAO;
-    private final ObjectMapper objectMapper;
+    private final RegistroTransacciones registro;
 
-    public CocheServiceImpl(CocheRepository cocheRepository, LogTransaccionDAO logTransaccionDAO,
-                            ObjectMapper objectMapper) {
+    public CocheServiceImpl(CocheRepository cocheRepository, RegistroTransacciones registro) {
         this.cocheRepository = cocheRepository;
-        this.logTransaccionDAO = logTransaccionDAO;
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public List<Coche> findAll() {
-        return cocheRepository.findAll();
+        this.registro = registro;
     }
 
     @Override
     public ResultadoPagina<Coche> buscar(String marca, String combustible, String transmision,
                                           int pagina, int tamanioPagina) {
-        long totalElementos = cocheRepository.contar(marca, combustible, transmision);
-        int totalPaginas = (int) Math.max(1, Math.ceil((double) totalElementos / tamanioPagina));
-        int paginaSegura = Math.max(0, Math.min(pagina, totalPaginas - 1));
-        List<Coche> contenido = cocheRepository.buscar(marca, combustible, transmision, paginaSegura, tamanioPagina);
-        return new ResultadoPagina<>(contenido, paginaSegura, totalPaginas, totalElementos);
+        long total = cocheRepository.contar(marca, combustible, transmision);
+        int totalPaginas = (int) Math.ceil((double) total / tamanioPagina);   // 10 coches / 6 = 2 paginas
+        int paginaValida = Math.max(0, Math.min(pagina, totalPaginas - 1));   // evita paginas que no existen
+        List<Coche> coches = cocheRepository.buscar(marca, combustible, transmision, paginaValida, tamanioPagina);
+        return new ResultadoPagina<>(coches, paginaValida, totalPaginas, total);
     }
 
     @Override
@@ -77,97 +55,72 @@ public class CocheServiceImpl implements CocheService {
 
     @Override
     public Coche save(Coche coche, String ip) {
-        ejecutarEnTransaccion(ip, "CREAR", coche, () -> cocheRepository.save(coche));
-        return coche;
+        try {
+            validar(coche);                     // si los datos no son validos, lanza DatosInvalidosException
+            Coche guardado = cocheRepository.save(coche);
+            registro.registrar(ip, "CREAR", guardado.getId(),
+                    coche.getMarca() + " " + coche.getModelo(), "OK");
+            return guardado;
+        } catch (RuntimeException e) {
+            registro.registrar(ip, "CREAR", null, e.getMessage(), "ERROR");
+            throw e;
+        }
     }
 
     @Override
     public void update(Long id, Coche coche, String ip) {
-        findById(id);
         coche.setId(id);
-        ejecutarEnTransaccion(ip, "EDITAR", coche, () -> cocheRepository.update(coche));
+        try {
+            findById(id);                       // si no existe, lanza CocheNoEncontradoException
+            validar(coche);
+            cocheRepository.update(coche);
+            registro.registrar(ip, "EDITAR", id,
+                    coche.getMarca() + " " + coche.getModelo(), "OK");
+        } catch (RuntimeException e) {
+            registro.registrar(ip, "EDITAR", id, e.getMessage(), "ERROR");
+            throw e;
+        }
     }
 
     @Override
     public void deleteById(Long id, String ip) {
-        Coche coche = findById(id);
-        ejecutarEnTransaccion(ip, "ELIMINAR", coche, () -> cocheRepository.deleteById(id));
-    }
-
-    /**
-     * Ejecuta el cambio sobre la tabla coche y su registro en log_transaccion como UNA sola
-     * transacción: o se guardan los dos (commit) o no se guarda ninguno (rollback).
-     */
-    private void ejecutarEnTransaccion(String ip, String accion, Coche coche, Runnable cambio) {
-        // ConexionBD reparte la misma Connection a todas las peticiones, así que las transacciones
-        // entran de una en una. Se bloquea sobre ConexionBD.class porque getInstancia() usa ese mismo
-        // candado: mientras dura la transacción, ninguna otra petición puede coger la conexión.
-        synchronized (ConexionBD.class) {
-            Connection conexion = ConexionBD.getInstancia().getConexion();
-            try {
-                conexion.setAutoCommit(false);
-                cambio.run();
-                logTransaccionDAO.registrar(ip, accion, coche.getId(), describir(coche), RESULTADO_OK);
-                conexion.commit();
-            } catch (SQLException | RuntimeException e) {
-                deshacer(conexion);
-                registrarFallo(ip, accion, coche.getId(), e);
-                throw e instanceof RuntimeException fallo
-                        ? fallo
-                        : new RuntimeException("Error al confirmar la operación " + accion, e);
-            } finally {
-                restaurarAutocommit(conexion);
-                actualizarArchivoJson();
-            }
-        }
-    }
-
-    // El archivo se regenera entero a partir de la tabla cuando la transacción ya ha terminado:
-    // así nunca contiene un cambio que el rollback haya deshecho
-    private void actualizarArchivoJson() {
         try {
-            String json = objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(logTransaccionDAO.listarTodos());
-            Files.writeString(ARCHIVO_LOG_JSON, json);
-        } catch (IOException | RuntimeException e) {
-            // Si falla la escritura, lo avisamos, pero la operación sobre el coche ya está resuelta
-            log.error("No se pudo actualizar {}", ARCHIVO_LOG_JSON, e);
-        }
-    }
-
-    // Tras el rollback se vuelve a autocommit para que el registro del fallo se guarde por su cuenta
-    private void deshacer(Connection conexion) {
-        try {
-            conexion.rollback();
-            conexion.setAutoCommit(true);
-        } catch (SQLException e) {
-            log.error("No se pudo deshacer la transacción", e);
-        }
-    }
-
-    // Va fuera de la transacción: si estuviera dentro, el rollback borraría también este registro
-    private void registrarFallo(String ip, String accion, Long cocheId, Exception fallo) {
-        // El DAO envuelve la SQLException; el motivo real (p. ej. matrícula duplicada) está en la causa más interna
-        Throwable causa = fallo;
-        while (causa.getCause() != null) {
-            causa = causa.getCause();
-        }
-        try {
-            logTransaccionDAO.registrar(ip, accion, cocheId, causa.getMessage(), RESULTADO_ERROR);
+            findById(id);                       // si no existe, lanza CocheNoEncontradoException
+            cocheRepository.deleteById(id);
+            registro.registrar(ip, "ELIMINAR", id, "coche id " + id, "OK");
         } catch (RuntimeException e) {
-            log.error("No se pudo registrar el fallo en log_transaccion", e);
+            registro.registrar(ip, "ELIMINAR", id, e.getMessage(), "ERROR");
+            throw e;
         }
     }
 
-    private void restaurarAutocommit(Connection conexion) {
-        try {
-            conexion.setAutoCommit(true);
-        } catch (SQLException e) {
-            log.error("No se pudo restaurar el autocommit de la conexión", e);
+    // Comprueba los datos del coche antes de tocar la base de datos
+    private void validar(Coche c) {
+        if (vacio(c.getMarca()) || vacio(c.getModelo()) || vacio(c.getMatricula()) || vacio(c.getColor())
+                || vacio(c.getCombustible()) || vacio(c.getTransmision())
+                || c.getAnio() == null || c.getPrecio() == null || c.getKilometraje() == null) {
+            throw new DatosInvalidosException("Todos los campos son obligatorios");
+        }
+        if (c.getMarca().length() > 50 || c.getModelo().length() > 50 || c.getMatricula().length() > 10
+                || c.getColor().length() > 30 || c.getCombustible().length() > 20 || c.getTransmision().length() > 20) {
+            throw new DatosInvalidosException("Algún texto es demasiado largo");
+        }
+        if (c.getAnio() < 1900 || c.getAnio() > 2100) {
+            throw new DatosInvalidosException("El año debe estar entre 1900 y 2100");
+        }
+        if (c.getPrecio().signum() < 0 || c.getKilometraje() < 0) {
+            throw new DatosInvalidosException("El precio y el kilometraje no pueden ser negativos");
+        }
+        if (c.getPrecio().compareTo(PRECIO_MAXIMO) > 0) {
+            throw new DatosInvalidosException("El precio es demasiado grande");
+        }
+        long idExcluido = c.getId() == null ? 0 : c.getId();   // al editar, el propio coche no cuenta como repetido
+        if (cocheRepository.existeMatricula(c.getMatricula(), idExcluido)) {
+            throw new DatosInvalidosException("Ya existe un coche con la matrícula " + c.getMatricula());
         }
     }
 
-    private String describir(Coche coche) {
-        return coche.getMarca() + " " + coche.getModelo() + " (" + coche.getMatricula() + ")";
+    private boolean vacio(String texto) {
+        return texto == null || texto.isBlank();
     }
 }

@@ -2,8 +2,6 @@ package com.example.coche.conexion;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,8 +9,6 @@ import java.util.Properties;
 
 public class ConexionBD {
 
-    // La URL, el usuario y la contraseña se leen de application.properties (claves db.*)
-    private static final String ARCHIVO_CONFIGURACION = "/application.properties";
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 
     private static ConexionBD instancia;
@@ -20,27 +16,30 @@ public class ConexionBD {
     private final Connection conexion;
 
     private ConexionBD() {
+        Properties config = cargarConfiguracion();
+        // Si existe la variable de entorno DB_PASSWORD, manda sobre la del archivo
+        String password = System.getenv("DB_PASSWORD");
+        if (password == null) {
+            password = config.getProperty("db.password");
+        }
         try {
-            Properties configuracion = cargarConfiguracion();
             Class.forName(DRIVER);
             conexion = DriverManager.getConnection(
-                    configuracion.getProperty("db.url"),
-                    configuracion.getProperty("db.usuario"),
-                    configuracion.getProperty("db.password", ""));
-        } catch (ClassNotFoundException | SQLException | IOException e) {
+                    config.getProperty("db.url"), config.getProperty("db.usuario"), password);
+        } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException("Error al conectar con la base de datos", e);
         }
     }
 
-    private static Properties cargarConfiguracion() throws IOException {
-        try (InputStream entrada = ConexionBD.class.getResourceAsStream(ARCHIVO_CONFIGURACION)) {
-            if (entrada == null) {
-                throw new IOException("No se encuentra " + ARCHIVO_CONFIGURACION);
-            }
-            Properties configuracion = new Properties();
-            configuracion.load(new InputStreamReader(entrada, StandardCharsets.UTF_8));
-            return configuracion;
+    // Lee url, usuario y contraseña de application.properties
+    private static Properties cargarConfiguracion() {
+        Properties config = new Properties();
+        try (InputStream archivo = ConexionBD.class.getResourceAsStream("/application.properties")) {
+            config.load(archivo);
+        } catch (IOException e) {
+            throw new RuntimeException("No se pudo leer application.properties", e);
         }
+        return config;
     }
 
     public static synchronized ConexionBD getInstancia() {

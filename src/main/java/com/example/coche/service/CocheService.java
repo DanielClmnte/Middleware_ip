@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface CocheService {
 
-    List<Coche> findAll();
-
     ResultadoPagina<Coche> buscar(String marca, String combustible, String transmision, int pagina, int tamanioPagina);
 
     List<String> listarMarcasDisponibles();
@@ -17,8 +15,6 @@ public interface CocheService {
     List<String> listarTransmisionesDisponibles();
 
     Coche findById(Long id);
-
-    // Las tres operaciones de escritura reciben la IP del cliente para apuntarla en log_transaccion
 
     Coche save(Coche coche, String ip);
 
